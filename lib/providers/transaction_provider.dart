@@ -13,8 +13,17 @@ class TransactionProvider with ChangeNotifier{
 
   List<Transaction> get transactions => _transactions;
 
-  double get totalIncome => _transactions.where((t) => t.type == TransactionType.income).fold(0.00, (sum, t) => sum + t.amount);
-  double get totalExpense => _transactions.where((t) => t.type == TransactionType.expense).fold(0.00, (sum, t) => sum + t.amount);
+  String totalIncome(DateTime date) {
+    return _transactions
+      .where((t) => t.type == TransactionType.income && t.date.day <= date.day && t.date.month == date.month && t.date.year == date.year)
+      .fold(0.00, (sum, t) => sum + t.amount).toStringAsFixed(2);
+  }
+
+  String totalExpense(DateTime date) {
+    return _transactions
+      .where((t) => t.type == TransactionType.expense && t.date.day <= date.day && t.date.month == date.month && t.date.year == date.year)
+      .fold(0.00, (sum, t) => sum + t.amount).toStringAsFixed(2);
+  }
 
   void addTransaction(Transaction transaction) async {
     _transactions.add(transaction);

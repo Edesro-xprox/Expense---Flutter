@@ -1,10 +1,12 @@
 import 'package:expense_managment/models/expense_data.dart';
+import 'package:expense_managment/models/transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 
 class ExpenseChart extends StatelessWidget {
-  final List<ExpenseData> data;
-  const ExpenseChart({super.key, required this.data});
+  final List<ExInData> data;
+  final TransactionType type;
+  const ExpenseChart({super.key, required this.data, required this.type});
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +65,7 @@ class ExpenseChart extends StatelessWidget {
         barRods: [
           BarChartRodData(
             toY: data[index].ammount.toDouble(),
-            color: Colors.orange,
+            color: type == TransactionType.income ? Colors.lightGreen : Colors.orangeAccent,
             width: 20,
             borderRadius: BorderRadius.circular(4),
           ),

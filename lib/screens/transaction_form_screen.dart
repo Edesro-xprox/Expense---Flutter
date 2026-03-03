@@ -5,7 +5,8 @@ import 'package:provider/provider.dart';
 
 class TransactionFormScreen extends StatefulWidget {
   final Transaction? transaction;
-  const TransactionFormScreen({super.key, this.transaction});
+  final TransactionType transactionType;
+  const TransactionFormScreen({super.key, this.transaction, required this.transactionType});
 
   @override
   State<TransactionFormScreen> createState() => _TransactionFormScreen();
@@ -16,11 +17,10 @@ class _TransactionFormScreen extends State<TransactionFormScreen>{
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
 
-  String _selectedCategory = 'Comida';
-
-  TransactionType _selectedType = TransactionType.expense;
-
-  final List<String> _categories = ['Comida','Transporte','Salud','Otros'];
+  late String _selectedCategory;
+  List<String> get categories => widget.transactionType == TransactionType.income 
+    ? ['Sueldo', 'Venta', 'Otros'] 
+    : ['Comida', 'Transporte', 'Salud', 'Otros'];
 
   @override
   void initState() {
@@ -29,7 +29,8 @@ class _TransactionFormScreen extends State<TransactionFormScreen>{
       _amountController.text = widget.transaction!.amount.toString();
       _descriptionController.text = widget.transaction!.description;
       _selectedCategory = widget.transaction!.category;
-      _selectedType = widget.transaction!.type;
+    }else{
+      _selectedCategory = widget.transactionType == TransactionType.income ? 'Sueldo' : 'Comida';
     }
   }
 
@@ -59,15 +60,16 @@ class _TransactionFormScreen extends State<TransactionFormScreen>{
               ),
               SizedBox(height: 20),
               TextFormField(
+                maxLines: null,
                 controller: _descriptionController,
                 decoration: InputDecoration(labelText: 'Descripción'),
-                keyboardType: TextInputType.text
+                keyboardType: TextInputType.multiline
               ),
               SizedBox(height: 20),
               DropdownButtonFormField(
                 value: widget.transaction?.category ?? _selectedCategory,
                 decoration: InputDecoration(labelText: 'Categoría'), 
-                items: _categories.map((category){
+                items: categories.map((category){
                   return DropdownMenuItem(
                     value: category,
                     child: Text(category),
@@ -81,34 +83,10 @@ class _TransactionFormScreen extends State<TransactionFormScreen>{
               ),
               SizedBox(height: 20),
 
-              Row(
-                children:[
-                  Expanded(
-                    child: RadioListTile(
-                      title: Text('Gasto'),
-                      value: TransactionType.expense,
-                      groupValue: _selectedType,
-                      onChanged: (TransactionType? value){
-                        setState(() {
-                          _selectedType = value!;
-                        });
-                      }
-                    )
-                  ),
-                  Expanded(
-                    child: RadioListTile(
-                      title: Text('Ingreso'),
-                      value: TransactionType.income,
-                      groupValue: _selectedType,
-                      onChanged: (TransactionType? value){
-                        setState(() {
-                          _selectedType = value!;
-                        });
-                      }
-                    )
-                  )
-                ]
-              ),
+              // Row(
+              //   children:[
+              //   ]
+              // ),
 
               Center(
                 child: ElevatedButton.icon(
@@ -120,8 +98,8 @@ class _TransactionFormScreen extends State<TransactionFormScreen>{
                         amount: double.parse(_amountController.text),
                         description: _descriptionController.text,
                         category: _selectedCategory,
-                        type: _selectedType,
-                        date: DateTime.now()
+                        type: widget.transactionType,
+                        date: widget.transaction?.date ?? DateTime.now()
                       );
                       if(widget.transaction == null){
                         Provider.of<TransactionProvider>(context, listen: false).addTransaction(transactionCurrent);

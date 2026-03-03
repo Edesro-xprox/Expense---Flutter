@@ -4,6 +4,7 @@ import 'package:expense_managment/screens/summary_screen.dart';
 import 'package:expense_managment/screens/transaction_form_screen.dart';
 import 'package:expense_managment/screens/transaction_history.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 void main() {
@@ -25,14 +26,25 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Gestor de Gastos',
       debugShowCheckedModeBanner: false,
+      // locale: const Locale('es'),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate
+      ],
+      supportedLocales: const [
+        Locale('es'),
+        Locale('en'),
+      ],
       initialRoute: '/',
       routes: {
         '/': (context) => SummaryScreen(),
-        '/transaction': (context) => TransactionFormScreen(), 
         '/history': (context) => TransactionHistoryScreen(),
         '/frmtransaction': (context) {
-          final transaction = ModalRoute.of(context)!.settings.arguments as Transaction?;
-          return TransactionFormScreen(transaction: transaction);
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+          final Transaction? transaction = args['transaction'];
+          final TransactionType transactionType = args['transactionType'];
+          return TransactionFormScreen(transaction: transaction, transactionType: transactionType);
         },
       }
     );
