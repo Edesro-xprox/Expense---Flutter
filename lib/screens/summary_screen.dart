@@ -1,5 +1,7 @@
+import 'package:expense_managment/models/category.dart';
 import 'package:expense_managment/models/expense_data.dart';
 import 'package:expense_managment/models/transaction.dart';
+import 'package:expense_managment/providers/category_provider.dart';
 import 'package:expense_managment/providers/transaction_provider.dart';
 import 'package:expense_managment/widgets/expense_chart.dart';
 import 'package:flutter/material.dart';
@@ -13,179 +15,143 @@ class SummaryScreen extends StatefulWidget {
 }
 
 class _SummaryScreenState extends State<SummaryScreen> {
-  late List<Transaction> transactions;
-  late TransactionProvider transactionProvider;
-  DateTime _selectedDate = DateTime.now();
+  CategoryType _selectedType = CategoryType.expense;
 
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
       context.read<TransactionProvider>().loadTransactions();
+      context.read<TransactionProvider>().loadCategories();
+      context.read<CategoryProvider>().loadCategories();
     });
   }
-
-  TransactionType _selectedType = TransactionType.expense;
 
   @override
   Widget build(BuildContext context) {
     final transactionProvider = context.watch<TransactionProvider>();
+    final categoryProvider = context.watch<CategoryProvider>();
+
     final transactions = transactionProvider.transactions;
-    final totalIncome = transactionProvider.totalIncome(_selectedDate);
-    final totalExpense = transactionProvider.totalExpense(_selectedDate);
 
-    final List<ExInData> expenseData = [
-      ExInData(
-        'Comida',
-        transactions
-          .where((t) => t.category == 'Comida' && t.type == TransactionType.expense && t.date.day <= _selectedDate.day && t.date.month == _selectedDate.month && t.date.year == _selectedDate.year)
-          .fold(0.00, (sum, t) => sum + t.amount)
-      ),
-      ExInData(
-        'Transporte',
-        transactions.where((t) => t.category == 'Transporte' && t.type == TransactionType.expense && t.date.day <= _selectedDate.day && t.date.month == _selectedDate.month && t.date.year == _selectedDate.year).fold(0.00, (sum, t) => sum + t.amount)
-      ),
-      ExInData(
-        'Salud',
-        transactions.where((t) => t.category == 'Salud' && t.type == TransactionType.expense && t.date.day <= _selectedDate.day && t.date.month == _selectedDate.month && t.date.year == _selectedDate.year).fold(0.00, (sum, t) => sum + t.amount)
-      ),
-      ExInData(
-        'Otros',
-        transactions.where((t) => t.category == 'Otros' && t.type == TransactionType.expense && t.date.day <= _selectedDate.day && t.date.month == _selectedDate.month && t.date.year == _selectedDate.year).fold(0.00, (sum, t) => sum + t.amount)
-      )
-    ];
+    final totalIncome = transactionProvider.totalIncome();
+    final totalExpense = transactionProvider.totalExpense();
+    
+    final balance = (double.parse(totalIncome) - double.parse(totalExpense)).toStringAsFixed(2);
 
-    final List<ExInData> incomeData = [
-      ExInData(
-        'Sueldo',
-        transactions.where((t) => t.category == 'Sueldo' && t.type == TransactionType.income && t.date.day <= _selectedDate.day && t.date.month == _selectedDate.month && t.date.year == _selectedDate.year).fold(0.00, (sum, t) => sum + t.amount)
-      ),
-      ExInData(
-        'Venta',
-        transactions.where((t) => t.category == 'Venta' && t.type == TransactionType.income && t.date.day <= _selectedDate.day && t.date.month == _selectedDate.month && t.date.year == _selectedDate.year).fold(0.00, (sum, t) => sum + t.amount)
-      ),
-      ExInData(
-        'Otros',
-        transactions.where((t) => t.category == 'Otros' && t.type == TransactionType.income && t.date.day <= _selectedDate.day && t.date.month == _selectedDate.month && t.date.year == _selectedDate.year).fold(0.00, (sum, t) => sum + t.amount)
-      )
-    ];
-
-    List<ExInData> exInDataCurrent = _selectedType == TransactionType.expense ? expenseData : incomeData;
+    final categoriesByType = categoryProvider.categoriesByType(_selectedType);
+    final exInDataCurrent = categoriesByType
+        .map(
+          (category) => ExInData(
+            category.name,
+            transactions
+                .where((t) => t.categoryId == category.id)
+                .fold(0.0, (sum, t) => sum + t.amount),
+          ),
+        )
+        .toList();
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
-        title: const Text('Resumen de Gastos'),
+        title: const Text('Control Financiero'),
         centerTitle: true,
-        actions:[
+        actions: [
           IconButton(
-            onPressed: (){
+            onPressed: () {
               Navigator.pushNamed(context, '/history');
             },
-            icon: Icon(Icons.history)
-          )
-        ]
+            icon: const Icon(Icons.history),
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children:[
-                Text(
-                  'Resumen ${_selectedDate.month}/${_selectedDate.year}',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold 
-                  )
-                ),
-                IconButton(
-                  onPressed: () async {
-                    final selected = await showDatePicker(
-                      context: context,
-                      initialDate: _selectedDate,
-                      firstDate: DateTime(2025),
-                      lastDate: DateTime(2030),
-                    );
-
-                    if (selected != null) {
-                      setState(() {
-                        _selectedDate = selected;
-                      });
-                    }
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Resumen',
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.arrow_upward_sharp, color: Colors.green),
+                  title: const Text('Ingresos'),
+                  subtitle: Text('S/$totalIncome'),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/frmtransaction', arguments: {
+                      'transaction': null,
+                      'categoryType': CategoryType.income,
+                    });
                   },
-                  icon: const Icon(Icons.calendar_today, color: Colors.blue)
-                )
-              ]
-            ),
-            SizedBox(height: 16),
-            Card(
-              child: ListTile(
-                leading: Icon(Icons.arrow_upward_sharp, color: Colors.green),
-                title: Text('Ingresos'),
-                subtitle: Text('S/${totalIncome}'),
-                onTap: (){
-                  Navigator.pushNamed(context, '/frmtransaction', arguments: {
-                    'transaction': null,
-                    'transactionType': TransactionType.income
-                  });  
-                }
-              )
-            ),
-            SizedBox(height: 20,),
-            Card(
-              child: ListTile(
-                leading: Icon(Icons.arrow_downward_outlined, color: Colors.red),
-                title: Text('Gastos'),
-                subtitle: Text('S/${totalExpense}'),
-                onTap: (){
-                  Navigator.pushNamed(context, '/frmtransaction', arguments: {
-                    'transaction': null,
-                    'transactionType': TransactionType.expense
-                  });
-                }
-              )
-            ),
-            SizedBox(height: 20),
-            ExpenseChart(data: exInDataCurrent, type: _selectedType),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children:[
-                Expanded(
-                  child: RadioListTile(
-                    value: TransactionType.expense,
-                    title: Text('Gastos'),
-                    groupValue: _selectedType, 
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedType = value!;
-                        exInDataCurrent = expenseData;
-                      });
-                    },
-                  )
                 ),
-                Expanded(
-                  child: RadioListTile(
-                    value: TransactionType.income, 
-                    title: Text('Ingresos'),
-                    groupValue: _selectedType,
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedType = value!;
-                        exInDataCurrent = incomeData;
-                      });
-                    }
-                  )
-                )
-              ]
-            )
-          ]
-        ) 
-      )
+              ),
+              const SizedBox(height: 20),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.arrow_downward_outlined, color: Colors.red),
+                  title: const Text('Egresos'),
+                  subtitle: Text('S/$totalExpense'),
+                  onTap: () {
+                    Navigator.pushNamed(context, '/frmtransaction', arguments: {
+                      'transaction': null,
+                      'categoryType': CategoryType.expense,
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+              Card(
+                child: ListTile(
+                  leading: const Icon(Icons.account_balance_wallet_outlined, color: Colors.black),
+                  title: const Text('Saldo actual'),
+                  subtitle: Text(
+                    '\$$balance',
+                    style: TextStyle(
+                      color: double.parse(balance) >= 0 ? Colors.green : Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              ExpenseChart(data: exInDataCurrent, type: _selectedType),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: RadioListTile<CategoryType>(
+                      value: CategoryType.expense,
+                      title: const Text('Egresos'),
+                      groupValue: _selectedType,
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setState(() => _selectedType = value);
+                      },
+                    ),
+                  ),
+                  Expanded(
+                    child: RadioListTile<CategoryType>(
+                      value: CategoryType.income,
+                      title: const Text('Ingresos'),
+                      groupValue: _selectedType,
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setState(() => _selectedType = value);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

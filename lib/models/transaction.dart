@@ -1,26 +1,28 @@
-enum TransactionType {
-  income,
-  expense
-}
-
-class Transaction{
+class Transaction {
   final String id;
-  final String category;
+  final String categoryId;
   final double amount;
   final String description;
-  final TransactionType type;
   final DateTime date;
+  final bool isPaid;
 
-  Transaction({ required this.id, required this.category, required this.amount, this.description = '', required this.type, required this.date});
+  Transaction({
+    required this.id,
+    required this.categoryId,
+    required this.amount,
+    this.description = '',
+    required this.date,
+    this.isPaid = false,
+  });
 
-  Map<String, dynamic> toMap(){
+  Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'category': category,
+      'category_id': categoryId,
       'amount': amount,
       'description': description,
-      'type': type == TransactionType.income ? 'income' : 'expense',
-      'date': date.toIso8601String()
+      'date': date.toIso8601String(),
+      'is_paid': isPaid ? 1 : 0,
     };
   }
 }

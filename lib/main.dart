@@ -1,4 +1,6 @@
+import 'package:expense_managment/models/category.dart';
 import 'package:expense_managment/models/transaction.dart';
+import 'package:expense_managment/providers/category_provider.dart';
 import 'package:expense_managment/providers/transaction_provider.dart';
 import 'package:expense_managment/screens/summary_screen.dart';
 import 'package:expense_managment/screens/transaction_form_screen.dart';
@@ -11,7 +13,8 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => TransactionProvider())
+        ChangeNotifierProvider(create: (_) => TransactionProvider()),
+        ChangeNotifierProvider(create: (_) => CategoryProvider()),
       ],
       child: MyApp()
     )
@@ -43,8 +46,8 @@ class MyApp extends StatelessWidget {
         '/frmtransaction': (context) {
           final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
           final Transaction? transaction = args['transaction'];
-          final TransactionType transactionType = args['transactionType'];
-          return TransactionFormScreen(transaction: transaction, transactionType: transactionType);
+          final CategoryType categoryType = args['categoryType'];
+          return TransactionFormScreen(transaction: transaction, categoryType: categoryType);
         },
       }
     );

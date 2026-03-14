@@ -1,4 +1,6 @@
+import 'package:expense_managment/models/category.dart';
 import 'package:expense_managment/models/transaction.dart';
+import 'package:expense_managment/providers/category_provider.dart';
 import 'package:expense_managment/providers/transaction_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -20,13 +22,16 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
     _selectedDate = DateTime.now();
     Future.microtask(() {
       context.read<TransactionProvider>().loadTransactions();
+      context.read<TransactionProvider>().loadCategories();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final transactionProvider = context.watch<TransactionProvider>();
+    final categoryProvider = context.watch<CategoryProvider>();
     final allTransactions = transactionProvider.transactions;
+    final allCategories = categoryProvider.categories;
 
     // Filtrar transacciones por mes y año seleccionado
     final filteredTransactions = allTransactions.where((transaction) {
@@ -93,22 +98,41 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                     itemCount: filteredTransactions.length,
                     itemBuilder: (context, index) {
                       final transaction = filteredTransactions[index];
+                      final category = allCategories.where(
+                        (c) => c.id == transaction.categoryId,
+                      );
                       return Card(
                         child: ListTile(
                           leading: Icon(
-                            transaction.type == TransactionType.income
+                            category.first.type == CategoryType.income
                                 ? Icons.arrow_upward_sharp
-                                : Icons.arrow_downward_outlined,
-                            color: transaction.type == TransactionType.income
+                                : (transaction.isPaid 
+                                    ? Icons.check_circle 
+                                    : Icons.arrow_downward_outlined),
+                            color: category.first.type == CategoryType.income
                                 ? Colors.green
-                                : Colors.red,
+                                : (transaction.isPaid ? Colors.blue : Colors.red),
                           ),
-                          title: Text(transaction.category),
-                          subtitle: Text('S/${transaction.amount.toStringAsFixed(2)}'),
+                          title: Text(category.first.name),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text('S/${transaction.amount.toStringAsFixed(2)}'),
+                              const SizedBox(height: 2),
+                              Text(
+                                _dateUtil.formattedDate(transaction.date),
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
                           trailing: Text(
                             '\$${transaction.amount.toStringAsFixed(2)}',
                             style: TextStyle(
-                              color: transaction.type == TransactionType.income
+                              color: category.first.type == CategoryType.income
                                   ? Colors.green
                                   : Colors.red,
                               fontWeight: FontWeight.bold,
@@ -118,7 +142,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                             Navigator.pushNamed(context, '/frmtransaction',
                                 arguments: {
                                   'transaction': transaction,
-                                  'transactionType': transaction.type
+                                  'categoryType': category.first.type
                                 });
                           },
                           onLongPress: () {
