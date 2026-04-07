@@ -11,6 +11,7 @@ class ExpenseChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return LayoutBuilder(
       builder: (context, constraints) {
         // Calculamos el ancho ideal: 80px por cada barra
@@ -46,7 +47,7 @@ class ExpenseChart extends StatelessWidget {
                         interval: _getYAxisInterval(),
                         getTitlesWidget: (value, meta) => Text(
                           _formatYAxisLabel(value),
-                          style: const TextStyle(fontSize: 10, color: Colors.grey),
+                          style: TextStyle(fontSize: 10, color: colorScheme.onSurface.withOpacity(0.6)),
                         ),
                       ),
                     ),
@@ -82,7 +83,7 @@ class ExpenseChart extends StatelessWidget {
                     horizontalInterval: _getYAxisInterval(),
                   ),
                   borderData: FlBorderData(show: false),
-                  barGroups: _buildBarGroups(),
+                  barGroups: _buildBarGroups(colorScheme),
                 ),
               ),
             ),
@@ -92,7 +93,7 @@ class ExpenseChart extends StatelessWidget {
     );
   }
 
-  List<BarChartGroupData> _buildBarGroups() {
+  List<BarChartGroupData> _buildBarGroups(ColorScheme colorScheme) {
     return List.generate(data.length, (index) {
       return BarChartGroupData(
         x: index,
@@ -101,7 +102,7 @@ class ExpenseChart extends StatelessWidget {
             toY: data[index].ammount.toDouble(),
             // Aumentamos el ancho de la barra de 20 a 30 para que se vea mejor
             width: 30, 
-            color: type == CategoryType.income ? Colors.green : Colors.redAccent,
+            color: type == CategoryType.income ? colorScheme.primary : colorScheme.secondary,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
           ),
         ],

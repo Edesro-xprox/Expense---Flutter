@@ -30,7 +30,7 @@ class TransactionProvider with ChangeNotifier{
 
   String totalExpense() {
     return _transactions
-      .where((t) => categories.where((c) => c.type == CategoryType.expense).map((c) => c.id).contains(t.categoryId))
+      .where((t) => t.isPaid && categories.where((c) => c.type == CategoryType.expense).map((c) => c.id).contains(t.categoryId))
       .fold(0.00, (sum, t) => sum + t.amount).toStringAsFixed(2);
   }
 

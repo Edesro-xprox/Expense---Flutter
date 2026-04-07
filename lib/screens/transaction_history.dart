@@ -30,6 +30,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
   Widget build(BuildContext context) {
     final transactionProvider = context.watch<TransactionProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
+    final colorScheme = Theme.of(context).colorScheme;
     final allTransactions = transactionProvider.transactions;
     final allCategories = categoryProvider.categories;
 
@@ -68,9 +69,9 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
+                  border: Border.all(color: colorScheme.outline),
                   borderRadius: BorderRadius.circular(8),
-                  color: Colors.grey[100],
+                  color: colorScheme.surface,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -79,7 +80,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                       _dateUtil.formattedDate(_selectedDate),
                       style: const TextStyle(fontSize: 16),
                     ),
-                    const Icon(Icons.calendar_today, color: Colors.blue),
+                    Icon(Icons.calendar_today, color: colorScheme.tertiary),
                   ],
                 ),
               ),
@@ -91,7 +92,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                 ? Center(
                     child: Text(
                       'No hay transacciones registradas para este mes',
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: TextStyle(color: colorScheme.onSurface.withOpacity(0.6)),
                     ),
                   )
                 : ListView.builder(
@@ -110,8 +111,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                                     ? Icons.check_circle 
                                     : Icons.arrow_downward_outlined),
                             color: category.first.type == CategoryType.income
-                                ? Colors.green
-                                : (transaction.isPaid ? Colors.blue : Colors.red),
+                                ? colorScheme.primary
+                                : (transaction.isPaid ? colorScheme.tertiary : colorScheme.secondary),
                           ),
                           title: Text(category.first.name),
                           subtitle: Column(
@@ -122,8 +123,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                               const SizedBox(height: 2),
                               Text(
                                 _dateUtil.formattedDate(transaction.date),
-                                style: const TextStyle(
-                                  color: Colors.grey,
+                                style: TextStyle(
+                                  color: colorScheme.onSurface.withOpacity(0.6),
                                   fontSize: 12,
                                 ),
                               ),
@@ -133,8 +134,8 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
                             '\$${transaction.amount.toStringAsFixed(2)}',
                             style: TextStyle(
                               color: category.first.type == CategoryType.income
-                                  ? Colors.green
-                                  : Colors.red,
+                                  ? colorScheme.primary
+                                  : colorScheme.secondary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),

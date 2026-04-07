@@ -31,6 +31,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
   Widget build(BuildContext context) {
     final transactionProvider = context.watch<TransactionProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
+    final colorScheme = Theme.of(context).colorScheme;
 
     final transactions = transactionProvider.transactions;
 
@@ -53,18 +54,36 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.green,
-        foregroundColor: Colors.white,
         title: const Text('Control Financiero'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/history');
-            },
-            icon: const Icon(Icons.history),
-          ),
-        ],
+      ),
+      drawer: Drawer(
+        width: 200,
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            SizedBox(
+              height: 100,
+              child: const DrawerHeader(
+                decoration: BoxDecoration(color: Color(0xFF171A21)),
+                child: Text('Menús', style: TextStyle(color: Color(0xFFE6EAF2), fontSize: 24)),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.category),
+              title: const Text('Categorías'),
+              onTap: () {
+                Navigator.pushNamed(context, '/categories'); // Navegar a la pantalla de categorías
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: const Text('Historial'),
+              onTap: () {
+                Navigator.pushNamed(context, '/history');
+              },
+            ),
+          ],
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -79,7 +98,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
               const SizedBox(height: 20),
               Card(
                 child: ListTile(
-                  leading: const Icon(Icons.arrow_upward_sharp, color: Colors.green),
+                  leading: Icon(Icons.arrow_upward_sharp, color: colorScheme.primary),
                   title: const Text('Ingresos'),
                   subtitle: Text('S/$totalIncome'),
                   onTap: () {
@@ -93,7 +112,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
               const SizedBox(height: 20),
               Card(
                 child: ListTile(
-                  leading: const Icon(Icons.arrow_downward_outlined, color: Colors.red),
+                  leading: Icon(Icons.arrow_downward_outlined, color: colorScheme.secondary),
                   title: const Text('Egresos'),
                   subtitle: Text('S/$totalExpense'),
                   onTap: () {
@@ -107,12 +126,12 @@ class _SummaryScreenState extends State<SummaryScreen> {
               const SizedBox(height: 20),
               Card(
                 child: ListTile(
-                  leading: const Icon(Icons.account_balance_wallet_outlined, color: Colors.black),
+                  leading: Icon(Icons.account_balance_wallet_outlined, color: colorScheme.tertiary),
                   title: const Text('Saldo actual'),
                   subtitle: Text(
                     '\$$balance',
                     style: TextStyle(
-                      color: double.parse(balance) >= 0 ? Colors.green : Colors.red,
+                      color: double.parse(balance) >= 0 ? colorScheme.primary : colorScheme.error,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

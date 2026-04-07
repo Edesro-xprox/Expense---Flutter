@@ -1,5 +1,3 @@
-import 'package:expense_managment/models/transaction.dart';
-
 enum CategoryType{
   income,
   expense
