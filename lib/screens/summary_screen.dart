@@ -55,6 +55,7 @@ class _SummaryScreenState extends State<SummaryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Control Financiero'),
+        surfaceTintColor: Colors.transparent
       ),
       drawer: Drawer(
         width: 200,
@@ -76,8 +77,8 @@ class _SummaryScreenState extends State<SummaryScreen> {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.history),
-              title: const Text('Historial'),
+              leading: const Icon(Icons.swap_horiz),
+              title: const Text('Transacciones'),
               onTap: () {
                 Navigator.pushNamed(context, '/history');
               },

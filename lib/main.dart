@@ -6,7 +6,7 @@ import 'package:expense_managment/screens/category_form_screen.dart';
 import 'package:expense_managment/screens/category_screen.dart';
 import 'package:expense_managment/screens/summary_screen.dart';
 import 'package:expense_managment/screens/transaction_form_screen.dart';
-import 'package:expense_managment/screens/transaction_history.dart';
+import 'package:expense_managment/screens/transaction_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';

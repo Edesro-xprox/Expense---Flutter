@@ -43,8 +43,68 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Historial de transacciones'),
-        centerTitle: true
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            Text('Lista de Transacciones'),
+            IconButton(
+              icon: const Icon(Icons.info_outline),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Notas:'),
+                    content: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Selección de fecha:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Al seleccionar una fecha, podrá ver todas las transacciones registradas hasta el día de la fecha pero solo dentro del mes seleccionado',
+                          ),
+                          const SizedBox(height: 16),
+                          const Text(
+                            'Íconos:',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: const [
+                              Icon(Icons.arrow_upward_sharp, color: Colors.green),
+                              SizedBox(width: 8),
+                              Expanded(child: Text(': Transacción de ingreso')),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: const [
+                              Icon(Icons.check_circle, color: Colors.blue),
+                              SizedBox(width: 8),
+                              Expanded(child: Text(': Transacción de egreso pagado')),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: const [
+                              Icon(Icons.arrow_downward_outlined, color: Colors.deepOrange,),
+                              SizedBox(width: 8),
+                              Expanded(child: Text(': Transacción de egreso')),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+      ),
+    );
+              }
+            )
+          ]
+        )
       ),
       body: Column(
         children: [
